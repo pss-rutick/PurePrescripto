@@ -166,7 +166,7 @@ export default function App() {
         {currentUser.role === 'doctor' && (
           <>
             {currentView === 'dashboard' && (
-              <DoctorDashboard onNavigate={handleNavigate} />
+              <DoctorDashboard onNavigate={handleNavigate} userName={currentUser.name} />
             )}
             {currentView === 'patients' && (
               <PatientsList onSelectPatient={handleSelectPatient} />

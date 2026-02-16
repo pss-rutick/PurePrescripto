@@ -1,3 +1,4 @@
+// src/app/components/doctor/RefillManagement.tsx
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -12,7 +13,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Filter
+  Filter,
+  Eye
 } from 'lucide-react';
 import { mockRefillRequests } from '../../lib/mockData';
 import { RefillRequest } from '../../lib/types';
@@ -25,9 +27,8 @@ export function RefillManagement({ onBack }: RefillManagementProps) {
   const [refills, setRefills] = useState<RefillRequest[]>(mockRefillRequests);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRefills, setSelectedRefills] = useState<string[]>([]);
-  const [showDenyModal, setShowDenyModal] = useState(false);
-  const [denyingRefill, setDenyingRefill] = useState<RefillRequest | null>(null);
-  const [denyReason, setDenyReason] = useState('');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedRefill, setSelectedRefill] = useState<RefillRequest | null>(null);
 
   const filteredRefills = refills.filter(refill =>
     refill.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -36,26 +37,9 @@ export function RefillManagement({ onBack }: RefillManagementProps) {
 
   const pendingRefills = filteredRefills.filter(r => r.status === 'pending');
 
-  const handleApprove = (refillId: string) => {
-    setRefills(refills.map(r =>
-      r.id === refillId ? { ...r, status: 'approved' as const } : r
-    ));
-  };
-
-  const handleDeny = (refill: RefillRequest) => {
-    setDenyingRefill(refill);
-    setShowDenyModal(true);
-  };
-
-  const confirmDeny = () => {
-    if (denyingRefill) {
-      setRefills(refills.map(r =>
-        r.id === denyingRefill.id ? { ...r, status: 'denied' as const } : r
-      ));
-    }
-    setShowDenyModal(false);
-    setDenyingRefill(null);
-    setDenyReason('');
+  const handleViewDetails = (refill: RefillRequest) => {
+    setSelectedRefill(refill);
+    setShowDetailsModal(true);
   };
 
   const handleBulkApprove = () => {
@@ -172,7 +156,7 @@ export function RefillManagement({ onBack }: RefillManagementProps) {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Pending Refill Requests</CardTitle>
+              <CardTitle>Recent Refill Requests</CardTitle>
               {pendingRefills.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -230,19 +214,11 @@ export function RefillManagement({ onBack }: RefillManagementProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeny(refill)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => handleViewDetails(refill)}
                         >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Deny
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => handleApprove(refill.id)}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Approve
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
                         </Button>
                       </div>
                     </div>
@@ -283,44 +259,53 @@ export function RefillManagement({ onBack }: RefillManagementProps) {
         )}
       </div>
 
-      {/* Deny Modal */}
-      <Dialog open={showDenyModal} onOpenChange={setShowDenyModal}>
-        <DialogContent>
+      {/* Details Modal */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Deny Refill Request</DialogTitle>
+            <DialogTitle>Refill Request Details</DialogTitle>
             <DialogDescription>
-              Please provide a reason for denying this refill request
+              Review the complete details of this refill request
             </DialogDescription>
           </DialogHeader>
-          {denyingRefill && (
+          {selectedRefill && (
             <div className="space-y-4">
-              <div className="p-3 bg-slate-50 rounded-lg">
-                <div className="text-sm">
-                  <div><strong>Patient:</strong> {denyingRefill.patientName}</div>
-                  <div><strong>Medication:</strong> {denyingRefill.medication}</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="text-xs text-slate-600 mb-1">Patient Name</div>
+                  <div className="font-medium">{selectedRefill.patientName}</div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Reason for Denial</Label>
-                <Textarea
-                  placeholder="Enter reason for denial..."
-                  value={denyReason}
-                  onChange={(e) => setDenyReason(e.target.value)}
-                  rows={4}
-                />
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="text-xs text-slate-600 mb-1">Medication</div>
+                  <div className="font-medium">{selectedRefill.medication}</div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="text-xs text-slate-600 mb-1">Last Fill Date</div>
+                  <div className="font-medium">{selectedRefill.lastFillDate}</div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="text-xs text-slate-600 mb-1">Remaining Refills</div>
+                  <div className="font-medium">{selectedRefill.remainingRefills}</div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="text-xs text-slate-600 mb-1">Pharmacy</div>
+                  <div className="font-medium">{selectedRefill.pharmacy}</div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="text-xs text-slate-600 mb-1">Status</div>
+                  <Badge
+                    variant={selectedRefill.status === 'approved' ? 'default' : selectedRefill.status === 'denied' ? 'destructive' : 'secondary'}
+                    className={selectedRefill.status === 'approved' ? 'bg-emerald-600' : ''}
+                  >
+                    {selectedRefill.status}
+                  </Badge>
+                </div>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDenyModal(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDeny}
-              disabled={!denyReason.trim()}
-            >
-              Confirm Denial
+            <Button variant="outline" onClick={() => setShowDetailsModal(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

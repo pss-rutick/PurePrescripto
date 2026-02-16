@@ -30,10 +30,10 @@ export function Sidebar({ userRole, currentView, onNavigate, onLogout, userName,
   const doctorMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'patients', label: 'Patients', icon: Users },
-    { id: 'new-prescription', label: 'New Prescription', icon: FileText },
+    { id: 'new-prescription', label: 'New Patient', icon: FileText },
     { id: 'refills', label: 'Refills', icon: RefreshCw },
     // { id: 'medication-history', label: 'Medication History', icon: History },
-    { id: 'controlled-substances', label: 'Controlled Substances', icon: ShieldAlert },
+    // { id: 'controlled-substances', label: 'Controlled Substances', icon: ShieldAlert },
     // { id: 'prior-authorization', label: 'Prior Authorization', icon: FileCheck },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
     // { id: 'settings', label: 'Settings', icon: Settings }
@@ -61,17 +61,19 @@ export function Sidebar({ userRole, currentView, onNavigate, onLogout, userName,
   ];
 
   const menuItems = userRole === 'doctor' ? doctorMenuItems :
-                    userRole === 'pharmacist' ? pharmacistMenuItems :
-                    adminMenuItems;
+    userRole === 'pharmacist' ? pharmacistMenuItems :
+      adminMenuItems;
 
   return (
     <div className="w-64 bg-slate-900 text-white flex flex-col h-screen">
       {/* Logo */}
       <div className="p-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center">
-            <Pill className="h-6 w-6" />
-          </div>
+          <img
+            src="/src/assets/pss- logo1.jpeg"
+            alt="PurePrescripto Logo"
+            className="h-10 w-10 rounded-lg object-cover"
+          />
           <div>
             <div className="font-semibold">PurePrescripto</div>
             <div className="text-xs text-slate-400">Healthcare Platform</div>

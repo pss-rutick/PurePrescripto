@@ -29,14 +29,16 @@ export function Login({ onLogin }: LoginProps) {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
-            <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-              <Lock className="h-8 w-8 text-blue-600" />
-            </div>
+            <img
+              src="/src/assets/pss- logo (1).jpeg"
+              alt="PurePrescripto Logo"
+              className="h-20 w-66 object-cover"
+            />
           </div>
           <div className="text-center space-y-2">
-            <CardTitle className="text-2xl">e-Prescribe Platform</CardTitle>
+            <CardTitle className="text-2xl">PurePrescripto</CardTitle>
             <CardDescription>
-              HIPAA-Compliant Electronic Prescribing System
+              Electronic Prescribing System
             </CardDescription>
           </div>
         </CardHeader>
@@ -48,7 +50,7 @@ export function Login({ onLogin }: LoginProps) {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <Input
@@ -87,7 +89,7 @@ export function Login({ onLogin }: LoginProps) {
             <div className="pt-4 border-t space-y-3">
               <div className="flex items-center justify-center gap-2 text-xs text-slate-600">
                 <Shield className="h-4 w-4" />
-                <span>HIPAA Compliant • DEA EPCS Certified</span>
+                <span>DEA EPCS Certified</span>
               </div>
               <div className="text-center text-xs text-slate-500">
                 Last login: February 12, 2026 at 3:45 PM EST

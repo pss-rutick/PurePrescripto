@@ -124,7 +124,7 @@ export function PatientProfile({ patient, onBack, onNewPrescription }: PatientPr
             <TabsTrigger value="allergies">Allergies</TabsTrigger>
             <TabsTrigger value="conditions">Conditions (ICD-10)</TabsTrigger>
             <TabsTrigger value="history">Prescription History</TabsTrigger>
-            <TabsTrigger value="pdmp">PDMP Check</TabsTrigger>
+            {/* <TabsTrigger value="pdmp">PDMP Check</TabsTrigger> */}
           </TabsList>
 
           {/* Overview Tab */}
@@ -155,7 +155,7 @@ export function PatientProfile({ patient, onBack, onNewPrescription }: PatientPr
                       </div>
                     </div>
                   </div>
-                  <div>
+                  {/* <div>
                     <div className="text-sm text-slate-600 mb-4">Insurance Information</div>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-sm">
@@ -176,7 +176,7 @@ export function PatientProfile({ patient, onBack, onNewPrescription }: PatientPr
                         </div>
                       )}
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </CardContent>
             </Card>
@@ -316,27 +316,119 @@ export function PatientProfile({ patient, onBack, onNewPrescription }: PatientPr
                 <CardTitle>Prescription History</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {patient.medications.map((med) => (
-                    <div key={med.id} className="p-4 bg-slate-50 rounded-lg">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <div className="font-medium">{med.name} {med.strength}</div>
-                          <div className="text-sm text-slate-600">{med.sig}</div>
-                          <div className="text-xs text-slate-500">
-                            Prescribed: {med.prescribedDate} • Pharmacy: {med.pharmacy}
+                {patient.medications.length === 0 ? (
+                  <div className="text-center py-8 text-slate-600">
+                    No prescription history available
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {(() => {
+                      // Group medications by date
+                      const groupedByDate = patient.medications.reduce((groups, med) => {
+                        const date = med.prescribedDate;
+                        if (!groups[date]) {
+                          groups[date] = [];
+                        }
+                        groups[date].push(med);
+                        return groups;
+                      }, {} as Record<string, typeof patient.medications>);
+
+                      // Sort dates in descending order (most recent first)
+                      const sortedDates = Object.keys(groupedByDate).sort((a, b) =>
+                        new Date(b).getTime() - new Date(a).getTime()
+                      );
+
+                      // Helper function to get relative date label
+                      const getRelativeDateLabel = (dateStr: string) => {
+                        const date = new Date(dateStr);
+                        const today = new Date();
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+
+                        // Reset time to compare only dates
+                        const resetTime = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                        const dateOnly = resetTime(date);
+                        const todayOnly = resetTime(today);
+                        const yesterdayOnly = resetTime(yesterday);
+
+                        if (dateOnly.getTime() === todayOnly.getTime()) {
+                          return 'Today';
+                        } else if (dateOnly.getTime() === yesterdayOnly.getTime()) {
+                          return 'Yesterday';
+                        } else {
+                          const diffTime = todayOnly.getTime() - dateOnly.getTime();
+                          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                          if (diffDays < 7) {
+                            return `${diffDays} days ago`;
+                          } else if (diffDays < 30) {
+                            const weeks = Math.floor(diffDays / 7);
+                            return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+                          } else if (diffDays < 365) {
+                            const months = Math.floor(diffDays / 30);
+                            return months === 1 ? '1 month ago' : `${months} months ago`;
+                          } else {
+                            const years = Math.floor(diffDays / 365);
+                            return years === 1 ? '1 year ago' : `${years} years ago`;
+                          }
+                        }
+                      };
+
+                      return sortedDates.map((date) => (
+                        <div key={date} className="space-y-3">
+                          {/* Date Header */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
+                              <Calendar className="h-4 w-4 text-blue-600" />
+                              {getRelativeDateLabel(date)}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {new Date(date).toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </div>
+                            <div className="flex-1 h-px bg-slate-200"></div>
+                          </div>
+
+                          {/* Medications for this date */}
+                          <div className="space-y-2 ml-6">
+                            {groupedByDate[date].map((med) => (
+                              <div key={med.id} className="p-4 bg-slate-50 rounded-lg border-l-4 border-blue-500">
+                                <div className="flex items-start justify-between">
+                                  <div className="space-y-1 flex-1">
+                                    <div className="font-medium flex items-center gap-2">
+                                      {med.name} {med.strength}
+                                      {med.scheduleClass && (
+                                        <Badge variant="destructive" className="text-xs">
+                                          {med.scheduleClass}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className="text-sm text-slate-600">{med.sig}</div>
+                                    <div className="text-xs text-slate-500 flex items-center gap-4 mt-2">
+                                      <span>Qty: {med.quantity}</span>
+                                      <span>Refills: {med.refills}</span>
+                                      <span>Pharmacy: {med.pharmacy}</span>
+                                    </div>
+                                  </div>
+                                  <Badge variant="secondary">Active</Badge>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                        <Badge>Active</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      ));
+                    })()}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* PDMP Check Tab */}
+          {/* PDMP Check Tab
           <TabsContent value="pdmp">
             <Card>
               <CardHeader>
@@ -366,7 +458,7 @@ export function PatientProfile({ patient, onBack, onNewPrescription }: PatientPr
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>

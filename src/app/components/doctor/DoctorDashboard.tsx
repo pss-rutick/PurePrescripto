@@ -1,3 +1,4 @@
+// src/app/components/doctor/DoctorDashboard.tsx
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
@@ -11,15 +12,17 @@ import {
   Activity,
   TrendingUp,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react';
 import { mockAlerts, mockRefillRequests, mockPatients } from '../../lib/mockData';
 
 interface DoctorDashboardProps {
   onNavigate: (view: string, data?: any) => void;
+  userName: string;
 }
 
-export function DoctorDashboard({ onNavigate }: DoctorDashboardProps) {
+export function DoctorDashboard({ onNavigate, userName }: DoctorDashboardProps) {
   const todaysAppointments = [
     { time: '09:00 AM', patient: 'John Smith', type: 'Follow-up', status: 'Completed' },
     { time: '10:30 AM', patient: 'Maria Garcia', type: 'Annual Physical', status: 'In Progress' },
@@ -29,7 +32,6 @@ export function DoctorDashboard({ onNavigate }: DoctorDashboardProps) {
 
   const stats = [
     { label: 'Patients Today', value: '12', icon: Users, color: 'blue' },
-    { label: 'Pending Refills', value: mockRefillRequests.length.toString(), icon: FileText, color: 'amber' },
     { label: 'Active Alerts', value: mockAlerts.length.toString(), icon: AlertTriangle, color: 'red' },
     { label: 'Prescriptions (30d)', value: '247', icon: TrendingUp, color: 'emerald' }
   ];
@@ -42,7 +44,7 @@ export function DoctorDashboard({ onNavigate }: DoctorDashboardProps) {
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
             <p className="text-sm text-slate-600 mt-1">
-              Welcome back, Dr. Johnson • Friday, February 13, 2026
+              Welcome back, {userName} • Friday, February 13, 2026
             </p>
           </div>
           <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => onNavigate('new-prescription')}>
@@ -72,7 +74,7 @@ export function DoctorDashboard({ onNavigate }: DoctorDashboardProps) {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -133,7 +135,7 @@ export function DoctorDashboard({ onNavigate }: DoctorDashboardProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Pending Refill Requests
+                Recent Refill Requests
               </CardTitle>
               <CardDescription>{mockRefillRequests.length} requests awaiting review</CardDescription>
             </CardHeader>
@@ -148,14 +150,15 @@ export function DoctorDashboard({ onNavigate }: DoctorDashboardProps) {
                         Last fill: {refill.lastFillDate}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        Deny
-                      </Button>
-                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                        Approve
-                      </Button>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onNavigate('refills')}
+                      className="gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      View
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -170,90 +173,46 @@ export function DoctorDashboard({ onNavigate }: DoctorDashboardProps) {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Drug Interaction Alerts */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
-                Drug Interaction Alerts
-              </CardTitle>
-              <CardDescription>3 patients require review</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="p-3 border border-amber-200 bg-amber-50 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">John Smith</div>
-                      <div className="text-xs text-slate-600 mt-1">
-                        Warfarin + Aspirin - Moderate interaction detected
-                      </div>
-                      <Button size="sm" variant="link" className="text-blue-600 h-auto p-0 mt-2">
-                        Review Medications →
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-3 border border-amber-200 bg-amber-50 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">Maria Garcia</div>
-                      <div className="text-xs text-slate-600 mt-1">
-                        Lisinopril + Potassium - Monitor electrolytes
-                      </div>
-                      <Button size="sm" variant="link" className="text-blue-600 h-auto p-0 mt-2">
-                        Review Medications →
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Controlled Substance Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShieldAlert className="h-5 w-5 text-red-600" />
-                Controlled Substance Summary
-              </CardTitle>
-              <CardDescription>Last 30 days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">Schedule II Prescriptions</span>
-                  <span className="text-lg font-semibold">24</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">Schedule III-V Prescriptions</span>
-                  <span className="text-lg font-semibold">67</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">PDMP Checks Performed</span>
-                  <span className="text-lg font-semibold">91</span>
-                </div>
-                <div className="pt-4 border-t">
-                  <div className="flex items-center gap-2 text-xs text-emerald-600">
-                    <Activity className="h-4 w-4" />
-                    <span>100% compliance with DEA requirements</span>
-                  </div>
+        {/* Controlled Substance Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-red-600" />
+              Controlled Substance Summary
+            </CardTitle>
+            <CardDescription>Last 30 days</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-600">Schedule II Prescriptions</span>
+                <span className="text-lg font-semibold">24</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-600">Schedule III-V Prescriptions</span>
+                <span className="text-lg font-semibold">67</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-600">PDMP Checks Performed</span>
+                <span className="text-lg font-semibold">91</span>
+              </div>
+              <div className="pt-4 border-t">
+                <div className="flex items-center gap-2 text-xs text-emerald-600">
+                  <Activity className="h-4 w-4" />
+                  <span>100% compliance with DEA requirements</span>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                className="w-full mt-4"
-                onClick={() => onNavigate('controlled-substances')}
-              >
-                View Detailed Report
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              onClick={() => onNavigate('controlled-substances')}
+            >
+              View Detailed Report
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
         <Card>
